@@ -11,7 +11,7 @@ docker compose up -d
 - Create table products
 
 ``` bash
-docker exec timescaledb psql -c 'create table products (id serial, title varchar, purchases int);'
+docker exec timescaledb psql -c 'create table solar_plants (timestamp timestamp with time zone default now(), id smallint, kw real, temp real);'
 ```
 
 - Populate table products

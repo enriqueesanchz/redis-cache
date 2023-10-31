@@ -21,16 +21,16 @@ const redis = createClient({
 });
 
 app.get('/', async (req, res) => {
-    const cache = await redis.get('most-purchased-products');
+    const cache = await redis.get('highest-production');
 
     if (cache) {
-        return res.send({ mostPurchased: JSON.parse(cache) });
+        return res.send({ highestProduction: JSON.parse(cache) });
     }
 
-    const mostPurchased = await db('products').orderBy('purchases', 'desc').limit(20);
-    await redis.setEx('most-purchased-products', 5, JSON.stringify(mostPurchased)); //setting an expiring time of 5 seconds to this cache
+    const highestProduction = await db('solar_plants').orderBy('kw', 'desc').limit(20);
+    await redis.setEx('highest-production', 5, JSON.stringify(highestProduction)); //setting an expiring time of 5 seconds to this cache
 
-    res.send({ mostPurchased });
+    res.send({ highestProduction });
 });
 
 app.listen(3000, async () => { //made this callback async so we can connect to redis client

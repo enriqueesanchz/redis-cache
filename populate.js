@@ -10,22 +10,41 @@ const db = knex({
     }
 });
 
+function generateTimestampsArray() {
+    const timestamps = [];
+    const now = new Date();
+    const fifteenMinutes = 15 * 60 * 1000; // 15 minutos en milisegundos
+
+    for (let i = 0; i < 25000; i++) {
+        const timestamp = new Date(now - (i * fifteenMinutes));
+        timestamps.push(timestamp);
+    }
+
+    return timestamps;
+}
+
 const main = async () => {
-    const products = ['shirt', 'bag', 'jeans', 'coat', 'socks'];
+    const timestampsArray = generateTimestampsArray();
+    const ids = [1, 2, 3];
+    const insertPromises = [];
 
-    await Promise.all( //running the insertions concurrently
-        Array.from({ length: 25000 }, (_, i) => i + 1) //creating a 25000 items empty array
-            .map(id => {
-                const title = products[Math.floor(Math.random() * products.length)]; // selecting random product title
+    for (const id of ids) {
+        insertPromises.push(
+            Promise.all(
+                timestampsArray.map(timestamp => {
+                    return db('solar_plants').insert({
+                        timestamp,
+                        id,
+                        kw: Math.random() * 10, ///generating a random number of purchases
+                        temp: 25 + (Math.random() - 0.5) * 25 //generating a random number of purchases
+                    });
+                })
+            )
+        );
+    }
 
-                return db('products').insert({
-                    id,
-                    title,
-                    purchases: Math.floor(Math.random() * 20000) //generating a random number of purchases
-                });
-            })
-    );
-    console.log('products inserted');
+    await Promise.all(insertPromises);
+    console.log('inserted');
 }
 
 main();
