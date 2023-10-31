@@ -1,0 +1,40 @@
+services:
+  timescaledb:
+    container_name: timescaledb
+    image: timescale/timescaledb-ha:pg14-latest
+    ports:
+      - "5555:5432"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    networks:
+      - network
+  
+  redis:
+    container_name: redis
+    image: redis
+    ports: 
+      - "6379:6379"
+    networks:
+      - network
+
+  nodejs:
+    container_name: nodejs
+    depends_on:
+      - timescaledb
+      - redis
+    build:
+      context: .
+      args:
+        POSTGRES_USER: "postgres"
+        POSTGRES_PASSWORD: "postgres"
+        POSTGRES_IP: "timescaledb"
+        POSTGRES_PORT: 5432
+        REDIS_IP: "redis"
+        REDIS_PORT: 6379
+    ports:
+      - "3333:3000"
+    networks:
+      - network
+
+networks:
+  network:
