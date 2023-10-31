@@ -26,7 +26,7 @@ docker exec nodejs node populate
 curl localhost:3333
 ```
 
-## Benchmark without Redis as cache
+## Benchmark
 
 TODO: no-redis
 
@@ -34,17 +34,19 @@ TODO: no-redis
 apt install nodejs
 apt install npm
 npm i autocannon -g
+```
 
+### Without Redis as cache
+
+TODO: no-redis
+
+``` bash
 autocannon localhost:3333/no-redis
 ```
 
-## Benchmark with Redis as cache
+### With Redis as cache
 
 ``` bash
-apt install nodejs
-apt install npm
-npm i autocannon -g
-
 autocannon localhost:3333
 ```
 
@@ -53,4 +55,5 @@ autocannon localhost:3333
 ``` bash
 docker compose down
 docker compose rm
+docker rmi redis-cache-nodejs
 ```
