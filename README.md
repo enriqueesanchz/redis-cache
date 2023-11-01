@@ -26,6 +26,10 @@ docker exec nodejs node populate
 curl localhost:3333
 ```
 
+### Api docs
+
+Api docs are generated using Swagger in /api-docs
+
 ## Benchmark
 
 ``` bash
@@ -38,12 +42,14 @@ npm i autocannon -g
 
 ``` bash
 autocannon localhost:3333/no-redis
+autocannon localhost:3333/no-redis/filter
 ```
 
 ### With Redis as cache
 
 ``` bash
 autocannon localhost:3333
+autocannon localhost:3333/filter
 ```
 
 Aprox. there will be x10 requests
