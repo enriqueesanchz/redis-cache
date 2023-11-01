@@ -97,7 +97,7 @@ app.post('/', async (req, res) => {
         const timestamp = new Date();
         const { id, kw, temp } = req.body;
 
-        if (typeof(id) === 'undefined' || typeof(kw) === 'undefined' || typeof(temp) === 'undefined') {
+        if (typeof (id) === 'undefined' || typeof (kw) === 'undefined' || typeof (temp) === 'undefined') {
             return res.status(400).json({ error: 'Required fields are missing' });
         }
 
@@ -110,6 +110,71 @@ app.post('/', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /no-redis/filter:
+ *   get:
+ *     summary: Get filtered random records without caching
+ *     description: Retrieve random records from the database based on kw and temp criteria without caching
+ *     responses:
+ *       200:
+ *         description: Successful response with filtered records.
+ *       400:
+ *         description: Bad request due to missing parameters.
+ *       500:
+ *         description: Server error while filtering records.
+ */
+app.get('/no-redis/filter', async (req, res) => {
+    const kw = Math.floor(Math.random() * 10);
+    const temp = Math.floor(25 + (Math.random() - 0.5) * 5);
+
+    const filteredRecords = await db('solar_plants')
+        .where('kw', '>=', kw)
+        .where('temp', '<=', temp)
+        .select('*')
+        .orderBy('kw', 'desc')
+        .limit(20);
+
+    res.status(200).json(filteredRecords);
+
+});
+
+/**
+ * @swagger
+ * /filter:
+ *   get:
+ *     summary: Get filtered random records with caching
+ *     description: Retrieve random records from the database based on kw and temp criteria with caching
+ *     responses:
+ *       200:
+ *         description: Successful response with filtered records.
+ *       400:
+ *         description: Bad request due to missing parameters.
+ *       500:
+ *         description: Server error while filtering records.
+ */
+app.get('/filter', async (req, res) => {
+    const kw = Math.floor(Math.random() * 9);
+    const temp = Math.floor(25 + (Math.random() - 0.5) * 5);
+
+    const cache = await redis.get(`${kw}-${temp}`);
+
+    if (cache) {
+        return res.send({ filteredRecords: JSON.parse(cache) });
+    }
+
+    const filteredRecords = await db('solar_plants')
+        .where('kw', '>=', kw)
+        .where('temp', '<=', temp)
+        .select('*')
+        .orderBy('kw', 'desc')
+        .limit(20);
+
+    await redis.setEx(`${kw}-${temp}`, 10, JSON.stringify(filteredRecords)); //setting an expiring time of 10 seconds to this cache
+
+    res.status(200).json(filteredRecords);
+
+});
 
 app.listen(3000, async () => { //made this callback async so we can connect to redis client
     await redis.connect();
