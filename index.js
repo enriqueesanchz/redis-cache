@@ -1,6 +1,8 @@
 const knex = require('knex');
 const express = require('express')
 const { createClient } = require('redis');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./swagger'); // Importa tu archivo de configuración Swagger
 
 const db = knex({
     client: 'pg',
@@ -20,6 +22,16 @@ const redis = createClient({
       }
 });
 
+/**
+ * @swagger
+ * /:
+ *   get:
+ *     summary: Obtiene las 20 medidas mas altas en kw usando Redis como cache
+ *     description: Retorna la lista de las 20 mayores medidas en kw.
+ *     responses:
+ *       200:
+ *         description: Lista de medidas obtenida con exito.
+ */
 app.get('/', async (req, res) => {
     const cache = await redis.get('highest-production');
 
@@ -33,10 +45,22 @@ app.get('/', async (req, res) => {
     res.send({ highestProduction });
 });
 
+/**
+ * @swagger
+ * /no-redis:
+ *   get:
+ *     summary: Obtiene las 20 medidas mas altas en kw sin usar cache
+ *     description: Retorna la lista de las 20 mayores medidas en kw.
+ *     responses:
+ *       200:
+ *         description: Lista de medidas obtenida con exito.
+ */
 app.get('/no-redis', async (req, res) => {
     const highestProduction = await db('solar_plants').orderBy('kw', 'desc').limit(20);
     res.send({ highestProduction });
 });
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.listen(3000, async () => { //made this callback async so we can connect to redis client
     await redis.connect();

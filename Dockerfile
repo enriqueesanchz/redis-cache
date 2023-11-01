@@ -1,8 +1,8 @@
 FROM node
 WORKDIR /redis-cache
 RUN npm init -y
-RUN npm install redis knex express pg
-COPY index.js populate.js ./
+RUN npm install redis knex express pg swagger-ui-express swagger-jsdoc
+COPY index.js populate.js swagger.js ./
 
 ARG POSTGRES_USER
 ARG POSTGRES_PASSWORD
