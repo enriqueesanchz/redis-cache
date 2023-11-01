@@ -28,8 +28,6 @@ curl localhost:3333
 
 ## Benchmark
 
-TODO: no-redis
-
 ``` bash
 apt install nodejs
 apt install npm
@@ -37,8 +35,6 @@ npm i autocannon -g
 ```
 
 ### Without Redis as cache
-
-TODO: no-redis
 
 ``` bash
 autocannon localhost:3333/no-redis
@@ -49,6 +45,8 @@ autocannon localhost:3333/no-redis
 ``` bash
 autocannon localhost:3333
 ```
+
+Aprox. there will be x10 requests
 
 ## Remove experiment
 

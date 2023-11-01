@@ -33,6 +33,11 @@ app.get('/', async (req, res) => {
     res.send({ highestProduction });
 });
 
+app.get('/no-redis', async (req, res) => {
+    const highestProduction = await db('solar_plants').orderBy('kw', 'desc').limit(20);
+    res.send({ highestProduction });
+});
+
 app.listen(3000, async () => { //made this callback async so we can connect to redis client
     await redis.connect();
     console.log('Listening on port 3000')
