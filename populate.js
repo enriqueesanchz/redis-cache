@@ -35,8 +35,8 @@ const main = async () => {
                     return db('solar_plants').insert({
                         timestamp,
                         id,
-                        kw: Math.random() * 10, ///generating a random number of purchases
-                        temp: 25 + (Math.random() - 0.5) * 25 //generating a random number of purchases
+                        kw: Math.random() * 10, 
+                        temp: 25 + (Math.random() - 0.5) * 25 
                     });
                 })
             )
