@@ -176,6 +176,96 @@ app.get('/filter', async (req, res) => {
 
 });
 
+/**
+ * @swagger
+ * /hour:
+ *   get:
+ *     summary: Get hourly kw details with caching
+ *     description: Retrieve median and maximum hourly details with caching
+ *     responses:
+ *       200:
+ *         description: Successful response.
+ *       500:
+ *         description: Server error while filtering records.
+ */
+app.get('/hour', async (req, res) => {
+    const cache = await redis.get('hour');
+
+    if (cache) {
+        return res.send({ filteredRecords: JSON.parse(cache) });
+    }
+
+    const filteredRecords = await db.raw(`
+    WITH per_hour AS (
+        SELECT
+        time,
+        value
+        FROM kwh_hour_by_hour
+        WHERE "time" at time zone 'Europe/Berlin' > date_trunc('month', time) - interval '1 year'
+        ORDER BY 1
+        ), hourly AS (
+        SELECT
+            extract(HOUR FROM time) * interval '1 hour' as hour,
+            value
+        FROM per_hour
+        )
+        SELECT
+            hour,
+            approx_percentile(0.50, percentile_agg(value)) as median,
+            max(value) as maximum
+        FROM hourly
+        GROUP BY 1
+        ORDER BY 1;
+    `);
+
+    await redis.setEx('hour', 10, JSON.stringify(filteredRecords)); //setting an expiring time of 10 seconds to this cache
+
+    res.status(200).json(filteredRecords);
+
+});
+
+/**
+ * @swagger
+ * /no-redis/hour:
+ *   get:
+ *     summary: Get hourly kw details without caching
+ *     description: Retrieve median and maximum hourly details without caching
+ *     responses:
+ *       200:
+ *         description: Successful response.
+ *       500:
+ *         description: Server error while filtering records.
+ */
+app.get('/no-redis/hour', async (req, res) => {
+
+    const filteredRecords = await db.raw(`
+    WITH per_hour AS (
+        SELECT
+        time,
+        value
+        FROM kwh_hour_by_hour
+        WHERE "time" at time zone 'Europe/Berlin' > date_trunc('month', time) - interval '1 year'
+        ORDER BY 1
+        ), hourly AS (
+        SELECT
+            extract(HOUR FROM time) * interval '1 hour' as hour,
+            value
+        FROM per_hour
+        )
+        SELECT
+            hour,
+            approx_percentile(0.50, percentile_agg(value)) as median,
+            max(value) as maximum
+        FROM hourly
+        GROUP BY 1
+        ORDER BY 1;
+    `);
+
+    res.status(200).json(filteredRecords);
+
+});
+
+
 app.listen(3000, async () => { //made this callback async so we can connect to redis client
     await redis.connect();
     console.log('Listening on port 3000')
