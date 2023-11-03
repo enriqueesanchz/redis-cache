@@ -41,6 +41,7 @@ curl localhost:3333
 ### Api docs
 
 Api docs are generated using Swagger in /api-docs
+![REST API methods](https://github.com/enriqueesanchz/redis-cache/swagger.png?raw=true)
 
 ## Benchmark
 
