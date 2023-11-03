@@ -14,10 +14,22 @@ docker compose up -d
 docker exec timescaledb psql -c 'create table solar_plants (timestamp timestamp with time zone default now(), id smallint, kw real, temp real);'
 ```
 
+- Create hypertable
+
+```bash
+docker exec timescaledb psql -c "SELECT create_hypertable('solar_plants', 'timestamp');"
+```
+
 - Populate table products
 
 ``` bash
 docker exec nodejs node populate
+```
+
+- Create materialized views
+
+``` bash
+./scripts/hypertables.sh
 ```
 
 - Curl localhost:3333
