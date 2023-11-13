@@ -1,11 +1,21 @@
 # Caching Timescaledb with Redis
 
+## Requirements
+
+```bash
+apt install docker.io
+apt install docker-compose
+apt install nodejs
+apt install npm
+npm i autocannon -g
+```
+
 ## Beggining
 
 - Create the containers
 
 ``` bash
-docker compose up -d
+docker-compose up -d
 ```
 
 - Create table products
@@ -45,12 +55,6 @@ Api docs are generated using Swagger in /api-docs
 
 ## Benchmark
 
-``` bash
-apt install nodejs
-apt install npm
-npm i autocannon -g
-```
-
 ### Without Redis as cache
 
 ``` bash
@@ -70,7 +74,7 @@ Aprox. there will be x10 requests
 ## Remove experiment
 
 ``` bash
-docker compose down
-docker compose rm
+docker-compose down
+docker-compose rm
 docker rmi redis-cache-nodejs
 ```

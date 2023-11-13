@@ -43,7 +43,7 @@ app.get('/', async (req, res) => {
     }
 
     const highestProduction = await db('solar_plants').orderBy('kw', 'desc').limit(20);
-    await redis.setEx('highest-production', 5, JSON.stringify(highestProduction)); //setting an expiring time of 5 seconds to this cache
+    await redis.setEx('highest-production', 10, JSON.stringify(highestProduction)); //setting an expiring time of 10 seconds to this cache
 
     res.send({ highestProduction });
 });
